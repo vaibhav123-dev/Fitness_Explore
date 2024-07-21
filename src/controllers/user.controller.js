@@ -1,8 +1,8 @@
-import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "./../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -39,19 +39,13 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   // Check if avatar and cover image are uploaded
-  const avatarLocalPath = req?.files?.avatar[0]?.path;
-  let coverImagesLocalpath;
-  if (req?.files && Array.isArray(req?.files?.coverImage) && req?.files?.coverImage?.length > 0) {
-    coverImagesLocalpath = req?.files?.coverImage[0]?.path;
-  }
-
+  const avatarLocalPath = req?.file?.path;
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar is required");
   }
 
   // Upload avatar and cover image to Cloudinary (assuming a reusable function)
   const avatar = await uploadOnCloudinary(avatarLocalPath);
-  const coverImage = await uploadOnCloudinary(coverImagesLocalpath);
 
   // Check if avatar upload was successful
   if (!avatar) {
@@ -65,7 +59,6 @@ const registerUser = asyncHandler(async (req, res) => {
     password,
     fullName,
     avatar: avatar?.url,
-    coverImage: coverImage ? coverImage?.url : "",
   });
 
   // Retrieve created user details
